@@ -60,9 +60,9 @@ class SLPP(object):
         newline = self.newline
 
         if isinstance(obj, str):
-            s += '"%s"' % obj.replace(r'"', r'\"')
+            s += '"%s"' % self.__escape_quotes(obj)
         elif six.PY2 and isinstance(obj, unicode):
-            s += '"%s"' % obj.encode('utf-8').replace(r'"', r'\"')
+            s += '"%s"' % self.__escape_quotes(obj.encode('utf-8'))
         elif six.PY3 and isinstance(obj, bytes):
             s += '"{}"'.format(''.join(r'\x{:02x}'.format(c) for c in obj))
         elif isinstance(obj, bool):
@@ -73,22 +73,22 @@ class SLPP(object):
             s += str(obj)
         elif isinstance(obj, (list, tuple, dict)):
             self.depth += 1
-            if len(obj) == 0 or (not isinstance(obj, dict) and len([
-                    x for x in obj
-                    if isinstance(x, Number) or (isinstance(x, six.string_types) and len(x) < 10)
-               ]) == len(obj)):
-                newline = tab = ''
             dp = tab * self.depth
             s += "%s{%s" % (tab * (self.depth - 2), newline)
             if isinstance(obj, dict):
                 contents = [dp + ('[%s] = %s') % (self.__encode(k), self.__encode(v)) for (k, v) in obj.items()]
                 s += (',%s' % newline).join(contents)
+                if len(obj) > 0:
+                    s += ','
             else:
                 s += (',%s' % newline).join(
                     [dp + self.__encode(el) for el in obj])
             self.depth -= 1
             s += "%s%s}" % (newline, tab * self.depth)
         return s
+
+    def __escape_quotes(self, s):
+        return s.replace(r'"', r'\"')
 
     def white(self):
         while self.ch:
