@@ -14,7 +14,7 @@ ERRORS = {
 
 def sequential(lst):
     length = len(lst)
-    if length == 0 or lst[0] != 0:
+    if length == 0 or lst[0] == 0:
         return False
     for i in range(length):
         if i + 1 < length:
